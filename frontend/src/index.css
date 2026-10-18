@@ -1,0 +1,150 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Identité : la copie Seyès (mode clair) et le tableau à la craie (mode sombre). */
+@theme {
+  --font-sans: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Caveat", "Segoe Print", cursive;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-pen: var(--pen);
+  --color-mark: var(--mark);
+  --color-ok: var(--ok);
+}
+
+:root {
+  --paper: #fbfbff;
+  --sheet: #ffffff;
+  --ink: #1b2a8c;
+  --ink-soft: #4a5296;
+  --line: #c3c8ee;
+  --grid: #eceefc;
+  --grid-strong: #d3d7f3;
+  --pen: #c41e3a;
+  --mark: #ffe86b;
+  --ok: #157a4e;
+  --margin: #f0a3ae;
+  --on-ink: #ffffff;
+  --shadow: rgba(27, 42, 140, 0.3);
+}
+
+.dark {
+  --paper: #1b342d;
+  --sheet: #244239;
+  --ink: #f2f1e8;
+  --ink-soft: #b8c5be;
+  --line: #4c6b60;
+  --grid: rgba(255, 255, 255, 0.05);
+  --grid-strong: rgba(255, 255, 255, 0.1);
+  --pen: #ff9a8f;
+  --mark: rgba(243, 223, 120, 0.32);
+  --ok: #86e3ae;
+  --margin: #a9625f;
+  --on-ink: #1b342d;
+  --shadow: rgba(0, 0, 0, 0.5);
+}
+
+@layer base {
+  html { color-scheme: light; }
+  html.dark { color-scheme: dark; }
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    background-image:
+      linear-gradient(var(--grid-strong) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-strong) 1px, transparent 1px),
+      linear-gradient(var(--grid) 1px, transparent 1px);
+    background-size: 100% 32px, 32px 100%, 100% 8px;
+  }
+  :focus-visible { outline: 3px solid var(--pen); outline-offset: 3px; }
+  ::selection { background: var(--mark); color: var(--ink); }
+}
+
+@layer components {
+  /* Feuille de copie : marge rouge et lignes */
+  .sheet {
+    position: relative;
+    background-color: var(--sheet);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: 0 24px 40px -22px var(--shadow);
+    background-image: linear-gradient(var(--grid) 1px, transparent 1px);
+    background-size: 100% 32px;
+    background-position: 0 24px;
+  }
+  .sheet::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; left: 28px;
+    width: 2px;
+    background: var(--margin);
+  }
+  @media (min-width: 640px) { .sheet::before { left: 52px; } }
+
+  .marker {
+    background-image: linear-gradient(transparent 58%, var(--mark) 58%, var(--mark) 92%, transparent 92%);
+  }
+
+  /* Cases à cocher des feuilles de QCM : rond = choix unique, carré = choix multiples */
+  .bubble {
+    display: inline-grid; place-items: center; flex: none;
+    width: 26px; height: 26px;
+    border: 2px solid var(--ink); border-radius: 999px;
+  }
+  .bubble::after {
+    content: ""; width: 12px; height: 12px; border-radius: 999px;
+    background: var(--ink); transform: scale(0);
+    transition: transform 0.15s ease;
+  }
+  .bubble.square { border-radius: 6px; }
+  .bubble.square::after { border-radius: 3px; }
+  .bubble[data-on="true"]::after { transform: scale(1); }
+  input:focus-visible + .bubble { outline: 3px solid var(--pen); outline-offset: 3px; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 0.7rem 1.2rem; font-weight: 600; cursor: pointer;
+    border: 2px solid var(--ink); border-radius: 6px;
+    transition: transform 0.12s, box-shadow 0.12s, background-color 0.12s;
+  }
+  .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.9rem; }
+  .btn-primary { background: var(--ink); color: var(--on-ink); box-shadow: 3px 3px 0 var(--pen); }
+  .btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--pen); }
+  .btn-primary:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--pen); }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .btn-ghost:hover { background: var(--mark); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .input {
+    width: 100%; padding: 0.65rem 0.8rem;
+    background: var(--sheet); color: var(--ink);
+    border: 2px solid var(--line); border-radius: 6px;
+  }
+  .input:focus-visible { border-color: var(--ink); outline-offset: 0; }
+  .input::placeholder { color: var(--ink-soft); opacity: 0.8; }
+}
+
+/* Tracé « stylo rouge » des coches et des croix */
+.draw { stroke-dasharray: 60; stroke-dashoffset: 60; animation: draw 0.45s ease-out forwards; }
+.draw-long { stroke-dasharray: 480; stroke-dashoffset: 480; animation: draw-long 0.9s ease-out 0.15s forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes draw-long { to { stroke-dashoffset: 0; } }
+
+/* Seule animation automatique de la page : la copie est posée sur le bureau */
+.drop-in { transform: rotate(-1.2deg); animation: drop 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes drop {
+  from { transform: translateY(-30px) rotate(-5deg); opacity: 0; }
+  to { transform: translateY(0) rotate(-1.2deg); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draw, .draw-long { animation: none; stroke-dashoffset: 0; }
+  .drop-in { animation: none; }
+  * { transition-duration: 0.01ms !important; }
+}
